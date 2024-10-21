@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.XiangmujinduDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.xuantishenhe_id as xuantishenheId
+        ,a.xiangmujindu_file as xiangmujinduFile
+        ,a.xiangmujindu_content as xiangmujinduContent
+        ,a.xiangmujindu_yesno_types as xiangmujinduYesnoTypes
+        ,a.xiangmujindu_yesno_text as xiangmujinduYesnoText
+        ,a.xiangmujindu_delete as xiangmujinduDelete
+        ,xiangmu.jiaoshi_id as xiangmuJiaoshiId
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.XiangmujinduView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,xuantishenhe.yonghu_id as xuantishenheYonghuId
+        ,xuantishenhe.xuantishenhe_yesno_types as xuantishenheYesnoTypes
+        ,xuantishenhe.xuantishenhe_yesno_text as xuantishenheYesnoText
+        ,xuantishenhe.xuantishenhe_delete as xuantishenheDelete
+
+        FROM xiangmujindu  a
+        left JOIN xuantishenhe xuantishenhe ON a.xuantishenhe_id = xuantishenhe.id
+        left JOIN xiangmu xiangmu ON xuantishenhe.xiangmu_id = xiangmu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.xuantishenheId != null and params.xuantishenheId != ''">
+                and (
+                    a.xuantishenhe_id = #{params.xuantishenheId}
+                )
+            </if>
+            <if test=" params.xiangmujinduContent != '' and params.xiangmujinduContent != null and params.xiangmujinduContent != 'null' ">
+                and a.xiangmujindu_content like CONCAT('%',#{params.xiangmujinduContent},'%')
+            </if>
+            <if test="params.xiangmujinduYesnoTypes != null and params.xiangmujinduYesnoTypes != ''">
+                and a.xiangmujindu_yesno_types = #{params.xiangmujinduYesnoTypes}
+            </if>
+            <if test="params.jiaoshiId != null  and params.jiaoshiId != ''">
+                and xiangmu.jiaoshi_id = #{params.jiaoshiId}
+            </if>
+            <if test=" params.xiangmujinduYesnoText != '' and params.xiangmujinduYesnoText != null and params.xiangmujinduYesnoText != 'null' ">
+                and a.xiangmujindu_yesno_text like CONCAT('%',#{params.xiangmujinduYesnoText},'%')
+            </if>
+            <if test="params.xiangmujinduDeleteStart != null and params.xiangmujinduDeleteStart != ''">
+                <![CDATA[  and a.xiangmujindu_delete >= #{params.xiangmujinduDeleteStart}   ]]>
+            </if>
+            <if test="params.xiangmujinduDeleteEnd != null and params.xiangmujinduDeleteEnd != ''">
+                <![CDATA[  and a.xiangmujindu_delete <= #{params.xiangmujinduDeleteEnd}   ]]>
+            </if>
+             <if test="params.xiangmujinduDelete != null and params.xiangmujinduDelete != ''">
+                and a.xiangmujindu_delete = #{params.xiangmujinduDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+
+                <!-- 判断选题审核的id不为空 -->
+            <if test=" params.xuantishenheIdNotNull != '' and params.xuantishenheIdNotNull != null and params.xuantishenheIdNotNull != 'null' ">
+                and a.xuantishenhe_id IS NOT NULL
+            </if>
+            <if test="params.xiangmuId != null  and params.xiangmuId != ''">
+                and xuantishenhe.xiangmu_id = #{params.xiangmuId}
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and xuantishenhe.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test="params.xuantishenheYesnoTypes != null  and params.xuantishenheYesnoTypes != ''">
+                and xuantishenhe.xuantishenhe_yesno_types = #{params.xuantishenheYesnoTypes}
+            </if>
+
+            <if test=" params.xuantishenheYesnoText != '' and params.xuantishenheYesnoText != null and params.xuantishenheYesnoText != 'null' ">
+                and xuantishenhe.xuantishenhe_yesno_text like CONCAT('%',#{params.xuantishenheYesnoText},'%')
+            </if>
+            <if test="params.xuantishenheDeleteStart != null  and params.xuantishenheDeleteStart != '' ">
+                <![CDATA[  and xuantishenhe.xuantishenhe_delete >= #{params.xuantishenheDeleteStart}   ]]>
+            </if>
+            <if test="params.xuantishenheDeleteEnd != null  and params.xuantishenheDeleteEnd != '' ">
+                <![CDATA[  and xuantishenhe.xuantishenhe_delete <= #{params.xuantishenheDeleteEnd}   ]]>
+            </if>
+            <if test="params.xuantishenheDelete != null  and params.xuantishenheDelete != '' ">
+                and xuantishenhe.xuantishenhe_delete = #{params.xuantishenheDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(xuantishenhe.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(xuantishenhe.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
